@@ -27,12 +27,12 @@ func parsePackage(data string) (int, time.Duration, error) {
 	//получаем количество шагов
 	n, err1 := strconv.Atoi(parts[0])
 	if err1 != nil {
-		fmt.Printf("Строка '%s' не является числом: '%v'\n", parts[0], err1)
+		fmt.Printf("Строка %s не является числом: %v\n", parts[0], err1)
 	}
 	//получаем время тренировки из второго элемента
 	m, err2 := time.ParseDuration(parts[1])
 	if err2 != nil {
-		fmt.Printf("Строка '%s' не является временем: '%v'\n", parts[1], err2)
+		fmt.Printf("Строка %s не является временем: %v\n", parts[1], err2)
 	}
 	if m <= 0 {
 		m = 0
@@ -49,7 +49,7 @@ func DayActionInfo(data string, weight, height float64) string {
 	distance := stepLength * float64(steps) / mInKm
 	fmt.Println(steps, timeTr, err)
 	cal, err2 := spentcalories.WalkingSpentCalories(steps, weight, height, timeTr)
-	training := fmt.Sprintf("Количество шагов: '%d'\nДистанция составила: '%.2f'км\nВы сожгли: '%.2f'\n", steps, distance, cal)
+	training := fmt.Sprintf("Количество шагов: %d.\nДистанция составила %.2f км.\nВы сожгли %.2f ккал.\n", steps, distance, cal)
 	fmt.Println(err2)
 	return training
 }
