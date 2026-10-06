@@ -2,7 +2,6 @@ package spentcalories
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -20,24 +19,36 @@ const (
 
 func parseTraining(data string) (int, string, time.Duration, error) {
 	//обрабатываем ошибки ввода
+	if data == "" {
+		return 0, "", 0, fmt.Errorf("пустая строка")
+	}
 	parts := strings.Split(data, ",")
 	if len(parts) != 3 {
-		fmt.Println("Неверное количество параметров")
-		os.Exit(1)
+		//fmt.Println("Неверное количество параметров")
+		//os.Exit(1)
+		return 0, "", 0, fmt.Errorf("неверное количество параметров")
 	}
 	//делим строку на переменные, чтобы использовать их далее
-	a, err1 := strconv.Atoi(parts[0])
+	steps, err1 := strconv.Atoi(parts[0])
 	if err1 != nil {
-		a = 0
-		fmt.Printf("Строка %s не является числом: %v\n", parts[0], err1)
+		return 0, "", 0, fmt.Errorf("шаги должны быть положительным числом: %w", err1)
+		//fmt.Printf("Строка %s не является числом: %v\n", parts[0], err1)
 	}
-	b := parts[1]
-	c, err3 := time.ParseDuration(parts[2])
+	if steps <= 0 {
+		return 0, "", 0, fmt.Errorf("шаги должны быть больше нуля")
+	}
+	activity := parts[1]
+	if activity == "" {
+		return 0, "", 0, fmt.Errorf("тип тренировки не указан")
+	}
+	duration, err3 := time.ParseDuration(parts[2])
 	if err3 != nil {
-		c = 0
-		fmt.Printf("Строка %s не является временем: %v\n", parts[2], err3)
+		return 0, "", 0, fmt.Errorf("неверный формат времени: %w", err3)
 	}
-	return a, b, c, nil
+	if duration <= 0 {
+		return 0, "", 0, fmt.Errorf("время должно быть больше нуля")
+	}
+	return steps, activity, duration, nil
 }
 
 func distance(steps int, height float64) float64 {
@@ -78,11 +89,11 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 		return 0, fmt.Errorf("Несоответствие введённых данных заданному типу")
 	}
 	meanSp := meanSpeed(steps, height, duration)
-	if meanSp > 10 {
-		err := fmt.Errorf("\nЭто уже не ходьба! %.2f км/ч", meanSp)
-		result := (weight * meanSp * duration.Minutes()) / minInH * walkingCaloriesCoefficient
-		return result, err
-	}
+	//if meanSp > 10 {
+	//	err := fmt.Errorf("\nЭто уже не ходьба! %.2f км/ч", meanSp)
+	//	result := (weight * meanSp * duration.Minutes()) / minInH * walkingCaloriesCoefficient
+	//	return result, err
+	//}
 	result := ((weight * meanSp * duration.Minutes()) / float64(minInH)) * walkingCaloriesCoefficient
 	return result, nil
 }
@@ -115,7 +126,8 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 	//вывод результата
 	dist := distance(stepsQn, height)
 	speed := meanSpeed(stepsQn, height, timeTr)
-	report := fmt.Sprintf("Тип тренировки: %s\nДлительность: %v\nДистанция: %.2f км\nСкорость: %.2f км/ч\nСожгли калорий: %.2f ккал.", typeTr, timeTr, dist, speed, cal)
+	//timeTr = duration.Hours(timeTr)
+	report := fmt.Sprintf("Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n", typeTr, timeTr.Hours(), dist, speed, cal)
 
 	return report, nil
 }
